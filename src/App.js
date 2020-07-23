@@ -1,26 +1,66 @@
-import React from 'react';
-import logo from './logo.svg';
+import React , { Component } from 'react';
+import Post from './components/post'
+import Fullpost from './components/fullpost'
+import Sendpost from './components/sendpost'
 import './App.css';
+import axios from 'axios';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+class App extends Component {
+
+      state = {
+        Posts : [],
+        SelectedPostId: null,
+        error: false
+      }
+
+      componentDidMount () {
+        axios.get('https://jsonplaceholder.typicode.com/postsg')
+        .then(response => {
+          const posts = response.data.slice(0, 4);
+          const updatedPosts = posts.map(post => {
+            return {
+              ...post,
+              author: 'max'
+            }
+          });
+          this.setState({Posts: updatedPosts});
+        })
+        .catch(error => {
+          // console.log(error);
+          this.setState({ error: true });
+        });
+      }
+
+      fullPostHandler = (id) =>{
+        this.setState({SelectedPostId: id});
+      }
+
+  render(){
+    let posts = <p>something went wrong!!!</p>;
+    if(!this.state.error) {
+      posts = this.state.Posts.map(post => {
+        return <Post 
+        title={post.title} 
+        author={post.author}
+        key ={post.id}
+        clicked = {() => this.fullPostHandler(post.id)}
         >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+        
+        </Post>
+      });
+    }
+    
+    return (
+      <div className="App">
+        <p>this is an app</p>
+
+        {posts}
+        
+        <Fullpost id = {this.state.SelectedPostId}></Fullpost>
+        <Sendpost></Sendpost>
+      </div>
+    );
+  }
 }
 
 export default App;
